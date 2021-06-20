@@ -429,6 +429,51 @@ void get_region_boxes(layer l, int w, int h, float thresh, float **probs, box *b
     }
 }
 
+// copied from Yolo v2 (legacy)
+void get_region_boxes_from_pred(layer l, float *predictions, int w, int h, float thresh, float **probs, box *boxes, int only_objectness, int *map, float tree_thresh)
+{
+    int i,j,n;
+    for (i = 0; i < l.w*l.h; ++i){
+        int row = i / l.w;
+        int col = i % l.w;
+        for(n = 0; n < l.n; ++n){
+            int index = i*l.n + n;
+            int p_index = index * (l.classes + 5) + 4;
+            float scale = predictions[p_index];
+            int box_index = index * (l.classes + 5);
+            boxes[index] = get_region_box(predictions, l.biases, n, box_index, col, row, l.w, l.h);
+            boxes[index].x *= w;
+            boxes[index].y *= h;
+            boxes[index].w *= w;
+            boxes[index].h *= h;
+
+            int class_index = index * (l.classes + 5) + 5;
+            if(l.softmax_tree){
+
+                hierarchy_predictions(predictions + class_index, l.classes, l.softmax_tree, 0);
+                if(map){
+                    for(j = 0; j < 200; ++j){
+                        float prob = scale*predictions[class_index+map[j]];
+                        probs[index][j] = (prob > thresh) ? prob : 0;
+                    }
+                } else {
+		  int j =  hierarchy_top_prediction(predictions + class_index, l.softmax_tree, tree_thresh, l.w*l.h);
+                    probs[index][j] = (scale > thresh) ? scale : 0;
+                    probs[index][l.classes] = scale;
+                }
+            } else {
+                for(j = 0; j < l.classes; ++j){
+                    float prob = scale*predictions[class_index+j];
+                    probs[index][j] = (prob > thresh) ? prob : 0;
+                }
+            }
+            if(only_objectness){
+                probs[index][0] = scale;
+            }
+        }
+    }
+}
+
 #ifdef GPU
 
 void forward_region_layer_gpu(const region_layer l, network_state state)

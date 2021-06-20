@@ -1,10 +1,10 @@
-GPU=0
-CUDNN=0
-CUDNN_HALF=0
-OPENCV=0
-AVX=0
-OPENMP=0
-LIBSO=0
+GPU=1
+CUDNN=1
+CUDNN_HALF=1
+OPENCV=1
+AVX=1
+OPENMP=1
+LIBSO=1
 ZED_CAMERA=0
 ZED_CAMERA_v2_8=0
 
@@ -17,10 +17,10 @@ ZED_CAMERA_v2_8=0
 USE_CPP=0
 DEBUG=0
 
-ARCH= -gencode arch=compute_35,code=sm_35 \
-      -gencode arch=compute_50,code=[sm_50,compute_50] \
-      -gencode arch=compute_52,code=[sm_52,compute_52] \
-	    -gencode arch=compute_61,code=[sm_61,compute_61]
+#ARCH= -gencode arch=compute_35,code=sm_35 \
+#      -gencode arch=compute_50,code=[sm_50,compute_50] \
+#      -gencode arch=compute_52,code=[sm_52,compute_52] \
+#	    -gencode arch=compute_61,code=[sm_61,compute_61]
 
 OS := $(shell uname)
 
@@ -37,7 +37,7 @@ OS := $(shell uname)
 # ARCH= -gencode arch=compute_70,code=[sm_70,compute_70]
 
 # GeForce RTX 2080 Ti, RTX 2080, RTX 2070, Quadro RTX 8000, Quadro RTX 6000, Quadro RTX 5000, Tesla T4, XNOR Tensor Cores
-# ARCH= -gencode arch=compute_75,code=[sm_75,compute_75]
+ARCH= -gencode arch=compute_75,code=[sm_75,compute_75]
 
 # Jetson XAVIER
 # ARCH= -gencode arch=compute_72,code=[sm_72,compute_72]
@@ -100,8 +100,16 @@ endif
 ifeq ($(OPENCV), 1)
 COMMON+= -DOPENCV
 CFLAGS+= -DOPENCV
-LDFLAGS+= `pkg-config --libs opencv4 2> /dev/null || pkg-config --libs opencv`
-COMMON+= `pkg-config --cflags opencv4 2> /dev/null || pkg-config --cflags opencv`
+##
+## OpenCV 4 or 3
+##
+# LDFLAGS+= `pkg-config --libs opencv4 2> /dev/null || pkg-config --libs opencv`
+# COMMON+= `pkg-config --cflags opencv4 2> /dev/null || pkg-config --cflags opencv`
+##
+## OpenCV 3 Only
+##
+LDFLAGS+= `pkg-config --libs opencv`
+COMMON+= `pkg-config --cflags opencv`
 endif
 
 ifeq ($(OPENMP), 1)
