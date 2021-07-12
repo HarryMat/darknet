@@ -875,8 +875,8 @@ public:
             float time_wait = 0.5;    // 0.5 second
             if (track_id_state_id_time[state_id].track_id > -1)
             {
-                if ((result_vec_pred[state_id].x > img_size.width) ||
-                    (result_vec_pred[state_id].y > img_size.height))
+	      if ((result_vec_pred[state_id].x > (unsigned int)img_size.width) ||
+		  (result_vec_pred[state_id].y > (unsigned int)img_size.height))
                 {
                     track_id_state_id_time[state_id].track_id = -1;
                 }
@@ -896,7 +896,7 @@ public:
 
         float min_dist = std::numeric_limits<float>::max();
 
-        for (size_t i = 0; i < max_objects; ++i)
+        for (size_t i = 0; i < (size_t)max_objects; ++i)
         {
             if (track_id_state_id_time[i].track_id > -1 && result_vec_pred[i].obj_id == find_box.obj_id && busy_vec[i] == false)
             {
@@ -986,7 +986,7 @@ public:
         clear_old_states();
         std::vector<bbox_t> result_vec;
 
-        for (size_t i = 0; i < max_objects; ++i)
+        for (size_t i = 0; i < (size_t)max_objects; ++i)
         {
             tst_t tst = track_id_state_id_time[i];
             if (tst.track_id > -1) {
@@ -1021,7 +1021,7 @@ public:
         calc_dt();
         clear_old_states();
 
-        for (size_t i = 0; i < max_objects; ++i)
+        for (size_t i = 0; i < (size_t)max_objects; ++i)
             track_id_state_id_time[i].detection_count--;
 
         std::vector<tst_t> tst_vec = find_state_ids(result_vec);
